@@ -1,4 +1,3 @@
-import os
 from flask import Flask, request, render_template, jsonify, session
 from werkzeug.utils import secure_filename
 from transformers import pipeline, DistilBertTokenizer
@@ -6,10 +5,10 @@ import textstat
 import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.tag import pos_tag
+import os
 
-# Set up our website
 app = Flask(__name__)
-app.secret_key = "call-quality-analyst"  # Needed for session management
+app.secret_key = "call-quality-analyst"  
 UPLOAD_FOLDER = "uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
@@ -32,7 +31,6 @@ def set_default_settings():
     if 'font_size' not in session:
         session['font_size'] = 'medium'  
 
-# Home page
 @app.route("/", methods=["GET", "POST"])
 def home():
     report = None
@@ -41,30 +39,28 @@ def home():
             return jsonify({"error": "No audio file uploaded!"}), 400
         audio_file = request.files["audio"]
         
-        # Save the audio file safely
+        # Save the audio 
         filename = secure_filename(audio_file.filename)
         audio_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         audio_file.save(audio_path)
         
-        # Analyze the audio and make a report
+        # Analyze the audio 
         report = analyze_audio(audio_path)
     
     return render_template("index.html", report=report, theme=session['theme'], font_size=session['font_size'])
 
-# Settings page
 @app.route("/settings", methods=["GET", "POST"])
 def settings():
     if request.method == "POST":
-        # Update theme and font size based on user input
+       
         session['theme'] = request.form.get('theme', 'classic-beige')
         session['font_size'] = request.form.get('font_size', 'medium')
         return jsonify({"success": "Settings updated!"}), 200
     
     return render_template("settings.html", theme=session['theme'], font_size=session['font_size'])
 
-# analyze audio
 def analyze_audio(audio_path):
-    #  Hugging Face's Whisper model to turn audio into text
+    # Hugging Face's Whisper model 
     try:
         result = transcriber(audio_path)
         text = result["text"] if "text" in result else "No speech detected"
@@ -200,5 +196,5 @@ def analyze_audio(audio_path):
     return report
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Use PORT if it's set, otherwise default to 5000
+    port = int(os.environ.get("PORT", 5000))  
     app.run(host="0.0.0.0", port=port)

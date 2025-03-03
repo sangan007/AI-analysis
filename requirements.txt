@@ -1,0 +1,9 @@
+flask
+assemblyai
+requests
+werkzeug
+transformers
+torch
+torchaudio
+textstat
+nltk

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call Quality Robot</title>
+    <!-- Load Google Fonts for Playfair Display and Lato -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Load FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Reset default styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Base styles for body */
+        body {
+            font-family: 'Lato', sans-serif;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Theme-specific styles */
+        body.classic-beige {
+            background-color: #F5F5DC;
+            background-image: url('https://www.transparenttextures.com/patterns/paper.png');
+            color: #1C2526;
+        }
+
+        body.deep-navy {
+            background-color: #1C2526;
+            color: #F5F5DC;
+        }
+
+        body.muted-gold {
+            background-color: #D4AF37;
+            background-image: url('https://www.transparenttextures.com/patterns/paper.png');
+            color: #1C2526;
+        }
+
+        body.warm-beige {
+            background-color: #F5F5DC;
+            background-image: url('https://www.transparenttextures.com/patterns/paper.png');
+            color: #1C2526;
+        }
+
+        /* Font size-specific styles */
+        body.small-font {
+            font-size: 12px;
+        }
+
+        body.medium-font {
+            font-size: 16px;
+        }
+
+        body.large-font {
+            font-size: 20px;
+        }
+
+        /* Navigation bar */
+        nav {
+            width: 100%;
+            background-color: #1C2526;
+            padding: 10px 0;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        nav ul li a {
+            color: #F5F5DC;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #D4AF37;
+        }
+
+        /* Main container */
+        .container {
+            max-width: 800px;
+            width: 90%;
+            margin-top: 60px; /* Space for fixed nav */
+            padding: 20px;
+            text-align: center;
+            flex: 1;
+        }
+
+        /* Header */
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            color: #1C2526;
+            margin-bottom: 10px;
+            cursor: pointer; /* For Easter egg */
+        }
+
+        .divider {
+            width: 100px;
+            height: 2px;
+            background: #D4AF37;
+            margin: 10px auto;
+            position: relative;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            width: 10px;
+            height: 10px;
+            background: #D4AF37;
+            border-radius: 50%;
+        }
+
+        .divider::before {
+            left: -5px;
+        }
+
+        .divider::after {
+            right: -5px;
+        }
+
+        /* Instructions */
+        p {
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: #1C2526;
+        }
+
+        /* Upload form */
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .upload-btn-wrapper input[type="file"] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-btn-wrapper button {
+            background-color: #D4AF37;
+            color: #1C2526;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn-wrapper button:hover {
+            background-color: #E5B73B;
+            box-shadow: 0 0 10px #D4AF37;
+        }
+
+        .analyze-btn {
+            background-color: #1C2526;
+            color: #F5F5DC;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .analyze-btn:hover {
+            background-color: #2A3A3C;
+            box-shadow: 0 0 10px #1C2526;
+        }
+
+        .analyze-btn.loading::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #F5F5DC;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        @keyframes spin {
+            0% { transform: translateY(-50%) rotate(0deg); }
+            100% { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        /* Error message */
+        #error-message {
+            color: #1C2526;
+            background-color: #E5E5E5;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* Report card */
+        .report-card {
+            margin-top: 20px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .report-card.visible {
+            opacity: 1;
+        }
+
+        .report-card h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            color: #1C2526;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #E5E5E5;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            border: 1px solid #D4AF37;
+            padding: 10px;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        th {
+            background-color: #1C2526;
+            color: #F5F5DC;
+            font-weight: 700;
+        }
+
+        tr {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: slideIn 0.5s forwards;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Easter egg */
+        #easter-egg {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #D4AF37;
+            color: #1C2526;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 30px;
+            }
+
+            .report-card h2 {
+                font-size: 20px;
+            }
+
+            table {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 24px;
+            }
+
+            .upload-form {
+                flex-direction: column;
+            }
+
+            .upload-btn-wrapper button, .analyze-btn {
+                width: 100%;
+            }
+
+            table, th, td {
+                display: block;
+                width: 100%;
+            }
+
+            th, td {
+                padding: 8px;
+                text-align: center;
+            }
+
+            tr {
+                margin-bottom: 10px;
+            }
+
+            th {
+                background-color: #1C2526;
+                color: #F5F5DC;
+            }
+        }
+    </style>
+</head>
+<body class="warm-beige medium-font">
+
+    <!-- Main content -->
+    <div class="container">
+        <h1 id="title">Call Quality Robot</h1>
+        <div class="divider"></div>
+        <p>Discover the Magic of Great Conversations<br>Upload your audio to see how well you connect with others.</p>
+
+        <form class="upload-form" id="upload-form">
+            <div class="upload-btn-wrapper">
+                <button type="button"><i class="fas fa-upload"></i> Upload Audio</button>
+                <input type="file" name="audio" accept="audio/*" id="audio-input" required>
+            </div>
+            <button type="submit" class="analyze-btn">Analyze</button>
+        </form>
+        <div id="error-message"></div>
+
+        <!-- Report card -->
+        <div class="report-card">
+            <h2>Call Quality Report Card</h2>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Score (Out of 20)</th>
+                    <th>Comments</th>
+                </tr>
+                
+                <tr style="animation-delay: 0.2s">
+                    <td>Clarity</td>
+                    <td>18</td>
+                    <td>Your speech was clear and easy to understand.</td>
+                </tr>
+                
+            </table>
+        </div>
+    </div>
+
+   
+    <div id="easter-egg">You found a treasure! Great job! 🌟</div>
+
+    
+    <script>
+        // Handle form submission with AJAX
+        document.getElementById('upload-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const analyzeBtn = document.querySelector('.analyze-btn');
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.style.display = 'none';
+
+            // Show loading spinner
+            analyzeBtn.classList.add('loading');
+            analyzeBtn.disabled = true;
+
+            fetch('/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                analyzeBtn.classList.remove('loading');
+                analyzeBtn.disabled = false;
+
+                if (data.error) {
+                    errorMessage.textContent = data.error;
+                    errorMessage.style.display = 'block';
+                } else {
+                  
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                analyzeBtn.classList.remove('loading');
+                analyzeBtn.disabled = false;
+                errorMessage.textContent = 'Oops! Something went wrong. Please try again.';
+                errorMessage.style.display = 'block';
+            });
+        });
+
+        let clickCount = 0;
+        document.getElementById('title').addEventListener('click', function () {
+            clickCount++;
+            if (clickCount === 5) {
+                const easterEgg = document.getElementById('easter-egg');
+                easterEgg.style.display = 'block';
+                setTimeout(() => {
+                    easterEgg.style.display = 'none';
+                    clickCount = 0;
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
